@@ -1,20 +1,28 @@
 import type { eventWithTime } from "@rrweb/types";
-import { useCallback, useEffect, useRef, useState, type ChangeEvent } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState, type ChangeEvent } from "react";
 import rrwebPlayer from "rrweb-player";
 import "rrweb-player/dist/style.css";
+import { calculateStats, StatsPanel } from "./StatsPanel";
 
 export const App = () => {
   const [events, setEvents] = useState<eventWithTime[] | null>(null);
+  const [fileSize, setFileSize] = useState<number>(0);
   const [error, setError] = useState<string | null>(null);
   const [fileName, setFileName] = useState<string | null>(null);
   const playerContainerRef = useRef<HTMLDivElement>(null);
   const playerInstanceRef = useRef<rrwebPlayer | null>(null);
+
+  const stats = useMemo(() => {
+    if (!events) return null;
+    return calculateStats(events, fileSize);
+  }, [events, fileSize]);
 
   const handleFileUpload = useCallback((e: ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
 
     setFileName(file.name);
+    setFileSize(file.size);
     setError(null);
 
     const reader = new FileReader();
@@ -51,6 +59,7 @@ export const App = () => {
   const clearPlayer = useCallback(() => {
     setEvents(null);
     setFileName(null);
+    setFileSize(0);
     setError(null);
     if (playerInstanceRef.current) {
       playerInstanceRef.current.pause();
@@ -118,9 +127,12 @@ export const App = () => {
       {error && <div className="error">{error}</div>}
 
       {events && (
-        <div className="player-wrapper">
-          <div ref={playerContainerRef} className="player-container" />
-        </div>
+        <>
+          <div className="player-wrapper">
+            <div ref={playerContainerRef} className="player-container" />
+          </div>
+          {stats && <StatsPanel stats={stats} />}
+        </>
       )}
 
       {!events && !error && (
