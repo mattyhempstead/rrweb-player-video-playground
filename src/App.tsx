@@ -2,6 +2,7 @@ import type { eventWithTime } from "@rrweb/types";
 import { useCallback, useEffect, useMemo, useRef, useState, type ChangeEvent } from "react";
 import rrwebPlayer from "rrweb-player";
 import "rrweb-player/dist/style.css";
+import { EventsViewer } from "./EventsViewer";
 import { calculateStats, StatsPanel } from "./StatsPanel";
 
 export const App = () => {
@@ -132,6 +133,7 @@ export const App = () => {
             <div ref={playerContainerRef} className="player-container" />
           </div>
           {stats && <StatsPanel stats={stats} />}
+          <EventsViewer events={events} />
         </>
       )}
 
