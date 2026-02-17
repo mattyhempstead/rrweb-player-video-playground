@@ -37,7 +37,13 @@ export const App = () => {
       try {
         const parsed = JSON.parse(content) as unknown;
 
-        // Extract events from { events: [...] } format
+        // Accept a plain array of events: [...]
+        if (Array.isArray(parsed)) {
+          setEvents(parsed as eventWithTime[]);
+          return;
+        }
+
+        // Accept an object with an events property: { events: [...] }
         if (parsed && typeof parsed === "object" && "events" in parsed) {
           const eventsData = (parsed as { events: unknown }).events;
           if (!Array.isArray(eventsData)) {
@@ -48,7 +54,7 @@ export const App = () => {
           return;
         }
 
-        setError("JSON must have an 'events' array property");
+        setError("JSON must be an array of events or an object with an 'events' array property");
       } catch {
         setError("Invalid JSON file");
       }
@@ -142,10 +148,10 @@ export const App = () => {
           <div className="placeholder-icon">🎬</div>
           <p>Upload a JSON file to start watching</p>
           <div className="format-hint">
-            <p className="format-title">Expected format:</p>
-            <pre className="format-code">{`{
-  "events": [ ... ]
-}`}</pre>
+            <p className="format-title">Accepted formats:</p>
+            <pre className="format-code">{`[ { "type": 4, ... }, ... ]`}</pre>
+            <p className="format-or">or</p>
+            <pre className="format-code">{`{ "events": [ ... ] }`}</pre>
           </div>
         </div>
       )}
